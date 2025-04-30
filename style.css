@@ -1,66 +1,113 @@
-// main.js
-
-const api = {
-  weather: 'https://api.meteo.lt/v1/places',
-  nasa: 'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY',
-  quote: 'https://api.quotable.io/random'
-};
-
-const cityInput = document.getElementById('cityInput');
-const getWeatherBtn = document.getElementById('getWeatherBtn');
-const weatherInfo = document.getElementById('weatherInfo');
-const nasaImage = document.getElementById('nasaImage');
-const dailyQuote = document.getElementById('dailyQuote');
-
-async function fetchWeather(city) {
-  try {
-    const res = await fetch(`${api.weather}/${city}/forecasts/long-term`);
-    if (!res.ok) throw new Error('Weather API failed');
-    const data = await res.json();
-    const today = data.forecastTimestamps[0];
-    weatherInfo.innerHTML = `
-      <p><strong>Temperature:</strong> ${today.airTemperature} °C</p>
-      <p><strong>Condition:</strong> ${today.conditionCode.replace(/-/g, ' ')}</p>
-      <p><strong>Wind Speed:</strong> ${today.windSpeed} m/s</p>
-    `;
-  } catch (error) {
-    weatherInfo.innerHTML = 'Failed to load weather data.';
-  }
+/* Base reset and global styling */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-async function fetchNasa() {
-  try {
-    const res = await fetch(api.nasa);
-    const data = await res.json();
-    nasaImage.innerHTML = `
-      <h3>${data.title}</h3>
-      <img src="${data.url}" alt="NASA Image" width="100%">
-      <p>${data.explanation}</p>
-    `;
-  } catch (error) {
-    nasaImage.innerHTML = 'Failed to load NASA image.';
-  }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f7fa;
+  color: #2c3e50;
+  padding: 2rem;
+  line-height: 1.6;
 }
 
-async function fetchQuote() {
-  try {
-    const res = await fetch(api.quote);
-    const data = await res.json();
-    dailyQuote.innerHTML = `
-      <blockquote>"${data.content}"</blockquote>
-      <p>- ${data.author}</p>
-    `;
-  } catch (error) {
-    dailyQuote.innerHTML = 'Failed to load quote.';
-  }
+/* Centered container */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
 }
 
-getWeatherBtn.addEventListener('click', () => {
-  const city = cityInput.value.toLowerCase();
-  if (city) fetchWeather(city);
-});
+/* Header and title */
+header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
 
-window.onload = () => {
-  fetchNasa();
-  fetchQuote();
-};
+header h1 {
+  font-size: 2rem;
+  color: #1d3557;
+  flex: 1 1 100%;
+}
+
+header input[type="text"] {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  flex: 1;
+}
+
+header button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background-color: #457b9d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+header button:hover {
+  background-color: #1d3557;
+}
+
+/* Section cards */
+section {
+  background-color: white;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+section h2 {
+  margin-bottom: 1rem;
+  color: #2a4d69;
+}
+
+/* Weather info */
+#weatherInfo p {
+  margin: 0.5rem 0;
+}
+
+/* NASA image */
+#nasaImage img {
+  width: 100%;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+/* Quote section */
+blockquote {
+  font-style: italic;
+  margin: 1rem 0;
+  border-left: 4px solid #6c757d;
+  padding-left: 1rem;
+  color: #444;
+}
+
+footer {
+  text-align: right;
+  font-weight: bold;
+  color: #555;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  header {
+    flex-direction: column;
+  }
+
+  header input,
+  header button {
+    width: 100%;
+  }
+}
