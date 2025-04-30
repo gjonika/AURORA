@@ -56,7 +56,7 @@ async function updateDashboard(city) {
       <h3>🌤️ Weather in ${city}</h3>
       <p>🌡️ Temp: ${weather.temp}°C (feels like ${weather.feelsLike}°C)</p>
       <p>💨 Wind: ${weather.wind} m/s</p>
-      <p>🌥️ Condition: ${weather.condition}</p>
+   <p>🌥️ Condition: ${formatCondition(weather.condition)} ${getWeatherIcon(weather.condition)}</p>
     `;
 
     document.getElementById("nasaImage").innerHTML = `
@@ -80,4 +80,29 @@ async function updateDashboard(city) {
 document.getElementById("fetchBtn").addEventListener("click", () => {
   const city = document.getElementById("cityInput").value.trim().toLowerCase();
   if (city) updateDashboard(city);
+
+
+
+function formatCondition(code) {
+  return code.replace(/-/g, ' ');
+}
+
+function getWeatherIcon(code) {
+  const iconMap = {
+    clear: '☀️',
+    partly_cloudy: '⛅',
+    cloudy: '☁️',
+    rain: '🌧️',
+    light_rain: '🌦️',
+    heavy_rain: '🌧️',
+    thunder: '⛈️',
+    snow: '❄️',
+    fog: '🌫️',
+    sleet: '🌨️'
+  };
+
+  return iconMap[code.replace(/-/g, '_')] || '🌡️';
+}
+
+  
 });
