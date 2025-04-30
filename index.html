@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AURORA Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AURORA Morning Dashboard</h1>
+      <input type="text" id="cityInput" placeholder="Enter city (e.g., vilnius)" />
+      <button onclick="updateDashboard()">Get Weather</button>
+    </header>
+
+    <section id="weatherSection">
+      <h2>Weather</h2>
+      <p id="temperature"></p>
+      <p id="condition"></p>
+      <p id="windSpeed"></p>
+    </section>
+
+    <section id="nasaSection">
+      <h2>NASA Image of the Day</h2>
+      <h3 id="nasaTitle"></h3>
+      <img id="nasaImage" src="" alt="NASA Astronomy Picture of the Day" />
+    </section>
+
+    <section id="quoteSection">
+      <h2>Daily Quote</h2>
+      <blockquote id="quote"></blockquote>
+      <p id="author"></p>
+    </section>
+  </div>
+
+  <script src="main.js" type="module"></script>
+</body>
+</html>
