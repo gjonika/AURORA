@@ -1,149 +1,167 @@
 /* style.css */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+:root {
+  --primary-color: #2ecc71;
+  --secondary-color: #27ae60;
+  --dark-color: #1e5228;
+  --light-color: #e8f5e9;
+  --success-color: #4caf50;
+  --warning-color: #f39c12;
+  --danger-color: #e74c3c;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
 body {
-  font-family: 'Montserrat', sans-serif;
-  margin: 0;
-  background-color: #e8f0e1; /* soft olive greenish tone */
-  padding: 2rem;
-  color: #2e2e2e;
+  background: linear-gradient(to right, #134e5e, #71b280);
+  color: #333;
+  line-height: 1.6;
 }
 
 .container {
-  max-width: 900px;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-header h1 {
-  font-size: 2.2rem;
-  color: #1c2f2f;
-  margin-bottom: 0.5rem;
+header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
 }
 
-.search-section {
-  display: flex;
-  gap: 10px;
+h1 {
+  font-size: 2.5rem;
   margin-bottom: 10px;
 }
 
-.search-section input {
-  flex-grow: 1;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
+.location-selector {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-.search-section button {
-  padding: 0.75rem 1rem;
-  background-color: #4e715b;
-  border: none;
+.location-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.location-form select,
+.location-form button {
+  padding: 12px 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.location-form button {
+  background-color: var(--primary-color);
   color: white;
-  border-radius: 8px;
-  font-weight: 600;
+  border: none;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s;
 }
 
-.search-section button:hover {
-  background-color: #3b5b45;
+.location-form button:hover {
+  background-color: var(--secondary-color);
 }
 
-.card {
-  background: #ffffff;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+.weather-display {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .current-weather {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
 }
 
-.current-weather img {
-  width: 80px;
-  height: 80px;
+.weather-info {
+  flex: 1;
+  min-width: 300px;
 }
 
-.weather-stats {
+.weather-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.detail-item {
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.forecast-tabs {
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-.temp-large {
-  font-size: 2.5rem;
-  font-weight: bold;
+.tab-button {
+  padding: 10px 20px;
+  background-color: #f1f1f1;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-weight: 600;
 }
 
-.description {
-  font-size: 1.2rem;
-  color: #555;
+.tab-button.active {
+  background-color: var(--primary-color);
+  color: white;
 }
 
-.location {
-  font-weight: 500;
-  color: #444;
+.forecast-content {
+  display: none;
 }
 
-.hourly-forecast {
-  display: flex;
-  overflow-x: auto;
-  gap: 1rem;
-  padding-top: 1rem;
+.forecast-content.active {
+  display: block;
 }
 
-.hour {
-  background-color: #f8faf7;
+.daily-forecast,
+.hourly-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.forecast-card,
+.hourly-item {
+  background: #f9f9f9;
   border-radius: 10px;
-  padding: 0.5rem;
-  min-width: 70px;
+  padding: 15px;
   text-align: center;
+}
+
+.chart-container {
+  margin-top: 30px;
+  height: 400px;
+}
+
+footer {
+  text-align: center;
+  color: white;
   font-size: 0.9rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-}
-
-#error {
-  color: red;
-  font-size: 0.9rem;
-}
-
-#nasaImage {
-  width: 100%;
-  max-height: 300px;
-  object-fit: cover;
-  margin-top: 1rem;
-  border-radius: 8px;
-}
-
-#quote {
-  font-size: 1.2rem;
-  font-style: italic;
-  color: #444;
-}
-
-#error, .error {
-  color: #b30000;
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
-}
-
-@media (max-width: 600px) {
-  .search-section {
-    flex-direction: column;
-  }
-
-  .search-section input,
-  .search-section button {
-    width: 100%;
-  }
-
-  .hourly-forecast {
-    gap: 0.5rem;
-  }
+  padding-top: 20px;
+  margin-top: 30px;
 }

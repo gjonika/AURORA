@@ -1,52 +1,90 @@
+<!-- This is index.html -->
+<!-- Part 1: HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AURORA Dashboard</title>
+  <title>Weather Forecast</title>
   <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" defer></script>
+  <script src="main.js" defer></script>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>AURORA Morning Dashboard</h1>
-      <div class="search-section">
-        <input type="text" id="cityInput" placeholder="Enter city (e.g., vilnius)" />
-        <button id="fetchBtn">Get Weather</button>
-      </div>
-      <p id="weatherError" class="error"></p>
+      <h1>Weather Forecast Dashboard</h1>
+      <p>Up-to-date info using meteo.lt API</p>
     </header>
 
-    <section id="weatherSection">
-      <h2>Current Weather</h2>
-      <div class="current-weather card">
-        <img id="weatherIcon" src="" alt="" />
-        <div class="weather-stats">
-          <div id="currentTemp" class="temp-large">--°C</div>
-          <div id="weatherCondition" class="description">--</div>
-          <div id="weatherLocation" class="location">--</div>
-          <div class="wind">💨 <span id="windSpeed">--</span> m/s</div>
+    <section class="location-selector">
+      <h2>Select City</h2>
+      <div class="location-form">
+        <select id="place-select">
+          <!-- Dynamically populated -->
+        </select>
+        <button id="get-weather-btn">Get Weather</button>
+      </div>
+    </section>
+
+    <section class="weather-display" id="weather-container">
+      <div id="loading-indicator">Please select a city</div>
+      <div id="weather-content" style="display: none;">
+        <div class="current-weather">
+          <div class="weather-info">
+            <h2 id="location-name">Vilnius</h2>
+            <p id="current-date"></p>
+            <div class="temperature" id="current-temp"></div>
+            <div class="weather-condition">
+              <img id="current-condition-icon" alt="icon" class="condition-icon">
+              <p id="current-condition"></p>
+            </div>
+          </div>
+          <div class="weather-details">
+            <div class="detail-item">
+              <span class="detail-label">Feels Like</span>
+              <span id="feels-like"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Wind</span>
+              <span id="wind-speed"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Humidity</span>
+              <span id="humidity"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Precipitation</span>
+              <span id="precipitation"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="forecast-tabs">
+          <button class="tab-button active" data-tab="daily">7-Day</button>
+          <button class="tab-button" data-tab="hourly">24-Hour</button>
+          <button class="tab-button" data-tab="chart">Chart</button>
+        </div>
+
+        <div id="daily-tab" class="forecast-content active">
+          <div id="daily-forecast-container" class="daily-forecast"></div>
+        </div>
+
+        <div id="hourly-tab" class="forecast-content">
+          <div class="hourly-forecast">
+            <div id="hourly-forecast-container" class="hourly-items"></div>
+          </div>
+        </div>
+
+        <div id="chart-tab" class="forecast-content">
+          <canvas id="temperature-chart"></canvas>
         </div>
       </div>
-
-      <h3>24-Hour Forecast</h3>
-      <div id="hourlyForecast" class="hourly-forecast"></div>
     </section>
 
-    <section id="nasaSection">
-      <h2>NASA Image of the Day</h2>
-      <h3 id="nasaTitle"></h3>
-      <img id="nasaImage" src="" alt="NASA Astronomy Picture of the Day" />
-    </section>
-
-    <section id="quoteSection">
-      <h2>Daily Quote</h2>
-      <blockquote id="quote"></blockquote>
-      <p id="author"></p>
-    </section>
+    <footer>
+      <p>Powered by <a href="https://meteo.lt" target="_blank">meteo.lt</a></p>
+    </footer>
   </div>
-
-  <script src="main.js" type="module"></script>
 </body>
 </html>

@@ -1,127 +1,185 @@
 // main.js
 
-const endpoints = {
-  weather: (city) => `https://api.meteo.lt/v1/places/${city}/forecasts/long-term`,
-  nasa: "https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY",
-  quote: "https://api.quotable.io/random",
+const API_BASE_URL = 'https://api.meteo.lt/v1';
+
+const placeSelect = document.getElementById('place-select');
+const getWeatherBtn = document.getElementById('get-weather-btn');
+const loadingIndicator = document.getElementById('loading-indicator');
+const weatherContent = document.getElementById('weather-content');
+const tabButtons = document.querySelectorAll('.tab-button');
+const forecastContent = document.querySelectorAll('.forecast-content');
+
+let temperatureChart = null;
+
+const conditionIcons = {
+  'clear': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/clear-day.svg',
+  'isolated-clouds': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/partly-cloudy-day.svg',
+  'scattered-clouds': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/cloudy.svg',
+  'overcast': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/overcast.svg',
+  'light-rain': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/rain.svg',
+  'moderate-rain': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/rain.svg',
+  'heavy-rain': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/thunderstorms-rain.svg',
+  'sleet': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/sleet.svg',
+  'light-snow': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/snow.svg',
+  'moderate-snow': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/snow.svg',
+  'heavy-snow': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/snow.svg',
+  'fog': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/fog.svg',
+  'na': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/not-available.svg'
 };
 
-function formatCondition(code) {
-  return code.replace(/-/g, ' ');
-}
+const conditionDescriptions = {
+  'clear': 'Clear Sky',
+  'isolated-clouds': 'Isolated Clouds',
+  'scattered-clouds': 'Scattered Clouds',
+  'overcast': 'Overcast',
+  'light-rain': 'Light Rain',
+  'moderate-rain': 'Moderate Rain',
+  'heavy-rain': 'Heavy Rain',
+  'sleet': 'Sleet',
+  'light-snow': 'Light Snow',
+  'moderate-snow': 'Moderate Snow',
+  'heavy-snow': 'Heavy Snow',
+  'fog': 'Fog',
+  'na': 'Not Available'
+};
 
-function getWeatherIcon(code) {
-  const iconMap = {
-    clear: '☀️',
-    partly_cloudy: '⛅',
-    cloudy: '☁️',
-    rain: '🌧️',
-    light_rain: '🌦️',
-    heavy_rain: '🌧️',
-    thunder: '⛈️',
-    snow: '❄️',
-    fog: '🌫️',
-    sleet: '🌨️'
-  };
-  return iconMap[code.replace(/-/g, '_')] || '🌡️';
-}
-
-function formatHourLabel(iso) {
-  const date = new Date(iso);
-  return `${date.getHours().toString().padStart(2, '0')}:00`;
-}
-
-function getIconFromCondition(code) {
-  const map = {
-    clear: "☀️",
-    "partly-cloudy": "⛅",
-    cloudy: "☁️",
-    rain: "🌧️",
-    "light-rain": "🌦️",
-    thunder: "⛈️",
-    snow: "❄️",
-    fog: "🌫️",
-  };
-  return map[code] || "❔";
-}
-
-async function getNasaImage() {
-  const res = await fetch(endpoints.nasa);
-  if (!res.ok) throw new Error("NASA API error");
-  const data = await res.json();
-  document.getElementById("nasaTitle").textContent = data.title;
-  document.getElementById("nasaImage").src = data.url;
-  document.getElementById("nasaImage").alt = data.title;
-}
-
-async function getQuote() {
-  const res = await fetch(endpoints.quote);
-  if (!res.ok) throw new Error("Quote API error");
-  const data = await res.json();
-  document.getElementById("quote").textContent = data.content;
-  document.getElementById("author").textContent = `— ${data.author}`;
-}
-
-async function updateDashboard() {
-  const city = document.getElementById("cityInput").value.trim().toLowerCase();
-  const errorEl = document.getElementById("weatherError");
-  errorEl.textContent = "";
-
-  if (!city) {
-    errorEl.textContent = "Please enter a city name.";
-    return;
-  }
-
-  try {
-    const res = await fetch(endpoints.weather(city));
-    if (!res.ok) throw new Error("Weather API error");
-    const data = await res.json();
-    const forecasts = data.forecastTimestamps.slice(0, 24);
-    const now = forecasts[0];
-
-    document.getElementById("currentTemp").textContent = `${now.airTemperature}°C`;
-    document.getElementById("weatherCondition").textContent = formatCondition(now.conditionCode);
-    document.getElementById("weatherLocation").textContent = data.place.name;
-    document.getElementById("windSpeed").textContent = now.windSpeed;
-    document.getElementById("weatherIcon").src = ""; // Placeholder or real image
-    document.getElementById("weatherIcon").alt = now.conditionCode;
-
-    const hourlyDiv = document.getElementById("hourlyForecast");
-    hourlyDiv.innerHTML = "";
-
-    forecasts.forEach(f => {
-      const hourBlock = document.createElement("div");
-      hourBlock.className = "hour";
-
-      hourBlock.innerHTML = `
-        <div>${formatHourLabel(f.forecastTimeUtc)}</div>
-        <div style="font-size: 1.2em;">${getIconFromCondition(f.conditionCode)}</div>
-        <div><strong>${f.airTemperature}°C</strong></div>
-      `;
-
-      hourlyDiv.appendChild(hourBlock);
+document.addEventListener('DOMContentLoaded', () => {
+  fetchPlaces();
+  getWeatherBtn.addEventListener('click', getWeather);
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      forecastContent.forEach(tab => tab.classList.remove('active'));
+      button.classList.add('active');
+      document.getElementById(`${button.dataset.tab}-tab`).classList.add('active');
     });
-  } catch (err) {
-    console.error("Weather error:", err);
-    errorEl.textContent = "Could not fetch weather data. Please try again later.";
-  }
+  });
+});
 
-  try {
-    await getNasaImage();
-  } catch (err) {
-    console.error("NASA error:", err);
-  }
-
-  try {
-    await getQuote();
-  } catch (err) {
-    console.error("Quote error:", err);
-  }
+function fetchPlaces() {
+  const cities = ['vilnius', 'kaunas', 'klaipeda', 'siauliai', 'panevezys'];
+  cities.forEach(city => {
+    const option = document.createElement('option');
+    option.value = city;
+    option.textContent = city.charAt(0).toUpperCase() + city.slice(1);
+    placeSelect.appendChild(option);
+  });
 }
 
-document.getElementById("fetchBtn").addEventListener("click", updateDashboard);
+async function getWeather() {
+  const city = placeSelect.value;
+  if (!city) return alert('Select a city');
 
-window.onload = () => {
-  getNasaImage();
-  getQuote();
-};
+  loadingIndicator.style.display = 'block';
+  weatherContent.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/places/${city}/forecasts/long-term`);
+    const data = await res.json();
+    displayWeather(data);
+  } catch (err) {
+    alert('Failed to fetch weather');
+    console.error(err);
+  }
+
+  loadingIndicator.style.display = 'none';
+  weatherContent.style.display = 'block';
+}
+
+function displayWeather(data) {
+  const now = data.forecastTimestamps[0];
+  document.getElementById('location-name').textContent = data.place.name;
+  document.getElementById('current-date').textContent = new Date(now.forecastTimeUtc).toDateString();
+  document.getElementById('current-temp').textContent = `${Math.round(now.airTemperature)}°C`;
+  document.getElementById('current-condition-icon').src = conditionIcons[now.conditionCode] || conditionIcons['na'];
+  document.getElementById('current-condition').textContent = conditionDescriptions[now.conditionCode] || 'Unknown';
+  document.getElementById('feels-like').textContent = `${Math.round(now.feelsLikeTemperature)}°C`;
+  document.getElementById('wind-speed').textContent = `${now.windSpeed} m/s`;
+  document.getElementById('humidity').textContent = `${now.relativeHumidity}%`;
+  document.getElementById('precipitation').textContent = `${now.totalPrecipitation} mm`;
+  
+  displayHourlyForecast(data.forecastTimestamps.slice(0, 24));
+  displayDailyForecast(data.forecastTimestamps);
+  createTemperatureChart(data.forecastTimestamps.slice(0, 24));
+}
+
+function displayHourlyForecast(hours) {
+  const container = document.getElementById('hourly-forecast-container');
+  container.innerHTML = '';
+  hours.forEach(hour => {
+    const el = document.createElement('div');
+    el.className = 'hourly-item';
+    el.innerHTML = `
+      <div class="hourly-time">${new Date(hour.forecastTimeUtc).getHours()}:00</div>
+      <img src="${conditionIcons[hour.conditionCode]}" class="hourly-icon" alt="">
+      <div class="hourly-temp">${Math.round(hour.airTemperature)}°C</div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+function displayDailyForecast(hours) {
+  const grouped = {};
+  hours.forEach(h => {
+    const day = h.forecastTimeUtc.split('T')[0];
+    if (!grouped[day]) grouped[day] = [];
+    grouped[day].push(h);
+  });
+
+  const container = document.getElementById('daily-forecast-container');
+  container.innerHTML = '';
+  Object.keys(grouped).slice(0, 7).forEach(day => {
+    const forecasts = grouped[day];
+    const temps = forecasts.map(f => f.airTemperature);
+    const condition = forecasts[0].conditionCode;
+    const el = document.createElement('div');
+    el.className = 'forecast-card';
+    el.innerHTML = `
+      <h3 class="forecast-day">${new Date(day).toLocaleDateString(undefined, { weekday: 'short' })}</h3>
+      <p class="forecast-date">${new Date(day).toLocaleDateString()}</p>
+      <img src="${conditionIcons[condition]}" class="forecast-icon" alt="">
+      <p>${conditionDescriptions[condition]}</p>
+      <div class="temp-high-low">
+        <div class="temp-high"><span>High</span><p>${Math.max(...temps)}°C</p></div>
+        <div class="temp-low"><span>Low</span><p>${Math.min(...temps)}°C</p></div>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+function createTemperatureChart(hours) {
+  const ctx = document.getElementById('temperature-chart').getContext('2d');
+  if (temperatureChart) temperatureChart.destroy();
+  temperatureChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: hours.map(h => `${new Date(h.forecastTimeUtc).getHours()}:00`),
+      datasets: [
+        {
+          label: 'Temperature',
+          data: hours.map(h => h.airTemperature),
+          borderColor: '#2ecc71',
+          tension: 0.4,
+          fill: true
+        },
+        {
+          label: 'Feels Like',
+          data: hours.map(h => h.feelsLikeTemperature),
+          borderColor: '#27ae60',
+          tension: 0.4,
+          fill: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top'
+        }
+      }
+    }
+  });
+}
