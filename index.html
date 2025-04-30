@@ -14,13 +14,22 @@
       <button onclick="updateDashboard()">Get Weather</button>
     </header>
 
-    <section id="weatherSection">
-      <h2>Weather</h2>
-        <div id="weatherInfo"></div>
-      <p id="temperature"></p>
-      <p id="condition"></p>
-      <p id="windSpeed"></p>
-    </section>
+  <section id="weatherSection">
+  <h2>Weather</h2>
+  <div id="currentWeather" class="card">
+    <img id="weatherIcon" src="" alt="" />
+    <div class="temperature" id="currentTemp">--°C</div>
+    <div class="description" id="weatherCondition">Condition</div>
+    <div class="location" id="weatherLocation">City</div>
+    <div class="wind">💨 <span id="windSpeed">--</span> m/s</div>
+  </div>
+
+  <div class="hourly-forecast">
+    <h3>24-Hour Forecast</h3>
+    <div id="hourlyForecast" class="weather-list"></div>
+  </div>
+</section>
+
 
     <section id="nasaSection">
       <h2>NASA Image of the Day</h2>
