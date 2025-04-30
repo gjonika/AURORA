@@ -1,0 +1,66 @@
+// main.js
+
+const api = {
+  weather: 'https://api.meteo.lt/v1/places',
+  nasa: 'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY',
+  quote: 'https://api.quotable.io/random'
+};
+
+const cityInput = document.getElementById('cityInput');
+const getWeatherBtn = document.getElementById('getWeatherBtn');
+const weatherInfo = document.getElementById('weatherInfo');
+const nasaImage = document.getElementById('nasaImage');
+const dailyQuote = document.getElementById('dailyQuote');
+
+async function fetchWeather(city) {
+  try {
+    const res = await fetch(`${api.weather}/${city}/forecasts/long-term`);
+    if (!res.ok) throw new Error('Weather API failed');
+    const data = await res.json();
+    const today = data.forecastTimestamps[0];
+    weatherInfo.innerHTML = `
+      <p><strong>Temperature:</strong> ${today.airTemperature} °C</p>
+      <p><strong>Condition:</strong> ${today.conditionCode.replace(/-/g, ' ')}</p>
+      <p><strong>Wind Speed:</strong> ${today.windSpeed} m/s</p>
+    `;
+  } catch (error) {
+    weatherInfo.innerHTML = 'Failed to load weather data.';
+  }
+}
+
+async function fetchNasa() {
+  try {
+    const res = await fetch(api.nasa);
+    const data = await res.json();
+    nasaImage.innerHTML = `
+      <h3>${data.title}</h3>
+      <img src="${data.url}" alt="NASA Image" width="100%">
+      <p>${data.explanation}</p>
+    `;
+  } catch (error) {
+    nasaImage.innerHTML = 'Failed to load NASA image.';
+  }
+}
+
+async function fetchQuote() {
+  try {
+    const res = await fetch(api.quote);
+    const data = await res.json();
+    dailyQuote.innerHTML = `
+      <blockquote>"${data.content}"</blockquote>
+      <p>- ${data.author}</p>
+    `;
+  } catch (error) {
+    dailyQuote.innerHTML = 'Failed to load quote.';
+  }
+}
+
+getWeatherBtn.addEventListener('click', () => {
+  const city = cityInput.value.toLowerCase();
+  if (city) fetchWeather(city);
+});
+
+window.onload = () => {
+  fetchNasa();
+  fetchQuote();
+};
