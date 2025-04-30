@@ -5,31 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AURORA Dashboard</title>
   <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
     <header>
       <h1>AURORA Morning Dashboard</h1>
-      <input type="text" id="cityInput" placeholder="Enter city (e.g., vilnius)" />
-  <button id="fetchBtn">Get Weather</button>
+      <div class="search-section">
+        <input type="text" id="cityInput" placeholder="Enter city (e.g., vilnius)" />
+        <button id="fetchBtn">Get Weather</button>
+      </div>
+      <p id="weatherError" class="error"></p>
     </header>
 
-  <section id="weatherSection">
-  <h2>Weather</h2>
-  <div id="currentWeather" class="card">
-    <img id="weatherIcon" src="" alt="" />
-    <div class="temperature" id="currentTemp">--°C</div>
-    <div class="description" id="weatherCondition">Condition</div>
-    <div class="location" id="weatherLocation">City</div>
-    <div class="wind">💨 <span id="windSpeed">--</span> m/s</div>
-  </div>
+    <section id="weatherSection">
+      <h2>Current Weather</h2>
+      <div class="current-weather card">
+        <img id="weatherIcon" src="" alt="" />
+        <div class="weather-stats">
+          <div id="currentTemp" class="temp-large">--°C</div>
+          <div id="weatherCondition" class="description">--</div>
+          <div id="weatherLocation" class="location">--</div>
+          <div class="wind">💨 <span id="windSpeed">--</span> m/s</div>
+        </div>
+      </div>
 
-  <div class="hourly-forecast">
-    <h3>24-Hour Forecast</h3>
-    <div id="hourlyForecast" class="weather-list"></div>
-  </div>
-</section>
-
+      <h3>24-Hour Forecast</h3>
+      <div id="hourlyForecast" class="hourly-forecast"></div>
+    </section>
 
     <section id="nasaSection">
       <h2>NASA Image of the Day</h2>
