@@ -136,4 +136,27 @@ section h2 {
   .hourly-forecast {
     gap: 0.5rem;
   }
+
+.hourly-forecast {
+  margin-top: 30px;
+  text-align: left;
+}
+
+.weather-list {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.hour {
+  background: #ffffffdd;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  min-width: 60px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+  
 }
