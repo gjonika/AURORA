@@ -42,9 +42,11 @@ async function getQuote() {
 
 async function updateDashboard(city) {
   try {
-    document.getElementById("weatherInfo").textContent = "Loading...";
-    document.getElementById("nasaImage").textContent = "";
-    document.getElementById("dailyQuote").textContent = "";
+
+document.getElementById("currentTemp").textContent = `${now.airTemperature}°C`;
+document.getElementById("weatherCondition").textContent = now.conditionCode.replace(/-/g, ' ');
+document.getElementById("weatherLocation").textContent = data.place.name;
+
 
     const [weather, nasa, quote] = await Promise.all([
       getWeather(city),
