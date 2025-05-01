@@ -2,7 +2,7 @@ const API_BASE_URL = 'https://api.meteo.lt/v1';
 
 const cities = [
   { code: 'vilnius', name: 'Vilnius' },
-  { code: 'mazeikiai', name: 'Mažeikiai' },
+  { code: 'mazeikiai', name: 'Mažeikiai' }, // ✅ this is valid!
   { code: 'klaipeda', name: 'Klaipėda' },
   { code: 'kaunas', name: 'Kaunas' },
   { code: 'siauliai', name: 'Šiauliai' }
