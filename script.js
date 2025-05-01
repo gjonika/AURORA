@@ -1,205 +1,215 @@
-/* styles.css */
+const API_BASE_URL = 'https://api.meteo.lt/v1';
 
-:root {
-  --primary: #4CAF50;
-  --secondary: #357a38;
-  --text: #1a1a1a;
-  --bg: #ecf3e7;
-  --card-bg: #ffffff;
-  --accent: #1b5e20;
-  --gray: #666;
-  --danger: #d32f2f;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+const cities = [
+  { code: 'vilnius', name: 'Vilnius' },
+  { code: 'mazeikiai', name: 'Mažeikiai' },
+  { code: 'klaipeda', name: 'Klaipėda' },
+  { code: 'kaunas', name: 'Kaunas' },
+  { code: 'siauliai', name: 'Šiauliai' }
+];
+
+const iconMap = {
+  'clear': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/clear-day.svg',
+  'partly-cloudy': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/partly-cloudy-day.svg',
+  'cloudy': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/cloudy.svg',
+  'cloudy-with-sunny-intervals': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/cloudy.svg',
+  'light-rain': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/rain.svg',
+  'rain': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/rain.svg',
+  'heavy-rain': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/thunderstorms-rain.svg',
+  'thunder': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/thunderstorms.svg',
+  'snow': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/snow.svg',
+  'fog': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/fog.svg',
+  'na': 'https://raw.githubusercontent.com/basmilius/weather-icons/master/production/fill/all/not-available.svg'
+};
+
+const conditionMap = {
+  'clear': 'Giedra',
+  'partly-cloudy': 'Mažai debesuota',
+  'cloudy': 'Debesuota',
+  'cloudy-with-sunny-intervals': 'Debesuota su pragiedruliais',
+  'light-rain': 'Nedidelis lietus',
+  'rain': 'Lietus',
+  'heavy-rain': 'Smarkus lietus',
+  'thunder': 'Perkūnija',
+  'snow': 'Sniegas',
+  'fog': 'Rūkas',
+  'na': 'Nėra duomenų'
+};
+
+function populateCityDropdown() {
+  const citySelect = document.getElementById('place-select');
+  cities.forEach(city => {
+    const option = document.createElement('option');
+    option.value = city.code;
+    option.textContent = city.name;
+    citySelect.appendChild(option);
+  });
 }
 
-body {
-  font-family: 'Segoe UI', Tahoma, sans-serif;
-  background-color: var(--bg);
-  color: var(--text);
-  margin: 0;
-  padding: 0;
+function formatDate(dateStr) {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('lt-LT', { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
-.container {
-  max-width: 1100px;
-  margin: auto;
-  padding: 2rem 1rem;
+function formatHour(dateStr) {
+  const date = new Date(dateStr);
+  return date.toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' });
 }
 
-header {
-  text-align: center;
-  margin-bottom: 2rem;
+function getDay(dateStr) {
+  return new Date(dateStr).toLocaleDateString('lt-LT', { weekday: 'short' });
 }
 
-header h1 {
-  font-size: 2.2rem;
-  color: var(--accent);
-  margin-bottom: 0.5rem;
+async function fetchForecast(cityCode) {
+  const response = await fetch(`${API_BASE_URL}/places/${cityCode}/forecasts/long-term`);
+  if (!response.ok) throw new Error('API klaida');
+  return response.json();
 }
 
-#place-selector {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 2rem;
+function updateCurrentWeather(data) {
+  const now = data.forecastTimestamps[0];
+  document.getElementById('city-name').textContent = data.place.name;
+  document.getElementById('current-date').textContent = formatDate(now.forecastTimeUtc);
+  document.getElementById('temperature').textContent = `${Math.round(now.airTemperature)}°C`;
+  document.getElementById('feels-like').textContent = `${Math.round(now.feelsLikeTemperature)}°C`;
+  document.getElementById('wind-speed').textContent = `${now.windSpeed} m/s`;
+  document.getElementById('condition-icon').src = iconMap[now.conditionCode] || iconMap['na'];
+  document.getElementById('condition-icon').alt = conditionMap[now.conditionCode] || 'Oro sąlygos';
+  document.getElementById('condition-text').textContent = conditionMap[now.conditionCode] || 'Nežinoma';
+
+  // Optional fields – currently placeholder values as meteo.lt long-term may not provide them
+  document.getElementById('humidity').textContent = '--%';
+  document.getElementById('precipitation').textContent = '-- mm';
+  document.getElementById('sunrise').textContent = '--';
+  document.getElementById('sunset').textContent = '--';
 }
 
-select, button {
-  padding: 0.8rem 1rem;
-  font-size: 1rem;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+function updateHourlyForecast(forecastTimestamps) {
+  const hourlyDiv = document.getElementById('hourly-forecast');
+  hourlyDiv.innerHTML = '';
+  forecastTimestamps.slice(0, 24).forEach(hour => {
+    const div = document.createElement('div');
+    div.className = 'hour-card';
+    div.innerHTML = `
+      <div>${formatHour(hour.forecastTimeUtc)}</div>
+      <img src="${iconMap[hour.conditionCode] || iconMap['na']}" alt="">
+      <div>${Math.round(hour.airTemperature)}°C</div>
+    `;
+    hourlyDiv.appendChild(div);
+  });
 }
 
-select {
-  min-width: 200px;
-  background-color: white;
+function updateDailyForecast(forecastTimestamps) {
+  const daysMap = {};
+  forecastTimestamps.forEach(f => {
+    const date = f.forecastTimeUtc.split('T')[0];
+    if (!daysMap[date]) daysMap[date] = [];
+    daysMap[date].push(f);
+  });
+
+  const dailyDiv = document.getElementById('daily-forecast');
+  dailyDiv.innerHTML = '';
+
+  Object.keys(daysMap).slice(0, 7).forEach(date => {
+    const entries = daysMap[date];
+    const temps = entries.map(e => e.airTemperature);
+    const min = Math.min(...temps);
+    const max = Math.max(...temps);
+    const common = entries.reduce((acc, e) => {
+      acc[e.conditionCode] = (acc[e.conditionCode] || 0) + 1;
+      return acc;
+    }, {});
+    const topCondition = Object.keys(common).sort((a, b) => common[b] - common[a])[0];
+
+    const div = document.createElement('div');
+    div.className = 'day-card';
+    div.innerHTML = `
+      <div>${getDay(date)}</div>
+      <img src="${iconMap[topCondition] || iconMap['na']}" alt="">
+      <div>${conditionMap[topCondition] || '---'}</div>
+      <div><strong>${Math.round(max)}°</strong> / ${Math.round(min)}°</div>
+    `;
+    dailyDiv.appendChild(div);
+  });
 }
 
-button {
-  background-color: var(--primary);
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: background 0.3s;
+function updateChart(forecastTimestamps) {
+  const ctx = document.getElementById('chart').getContext('2d');
+  const times = forecastTimestamps.slice(0, 24).map(f => formatHour(f.forecastTimeUtc));
+  const temps = forecastTimestamps.slice(0, 24).map(f => f.airTemperature);
+  const feels = forecastTimestamps.slice(0, 24).map(f => f.feelsLikeTemperature);
+
+  if (window.tempChart) window.tempChart.destroy();
+
+  window.tempChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: times,
+      datasets: [
+        {
+          label: 'Temperatūra',
+          data: temps,
+          borderColor: '#4caf50',
+          backgroundColor: 'rgba(76, 175, 80, 0.2)',
+          fill: true
+        },
+        {
+          label: 'Juntama temperatūra',
+          data: feels,
+          borderColor: '#81c784',
+          backgroundColor: 'rgba(129, 199, 132, 0.2)',
+          fill: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top'
+        }
+      }
+    }
+  });
 }
 
-button:hover {
-  background-color: var(--secondary);
+function toggleTabs() {
+  document.querySelectorAll('.tab-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.getAttribute('data-tab');
+      document.querySelectorAll('.forecast-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+      document.getElementById(tab).classList.add('active');
+      btn.classList.add('active');
+    });
+  });
 }
 
-section {
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: var(--shadow);
-  margin-bottom: 2rem;
-}
+async function getWeather() {
+  const city = document.getElementById('place-select').value;
+  if (!city) return alert('Pasirinkite miestą.');
 
-.weather-main {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
+  document.getElementById('loading-indicator').style.display = 'block';
 
-.weather-main img {
-  width: 100px;
-  height: 100px;
-}
-
-.weather-info {
-  flex: 1;
-}
-
-.weather-info h2 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.detail-item {
-  background-color: #f9f9f9;
-  padding: 0.8rem;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.forecast-tabs {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.tab-button {
-  background-color: #e0e0e0;
-  border: none;
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.tab-button.active {
-  background-color: var(--primary);
-  color: white;
-}
-
-.forecast-content {
-  display: none;
-  margin-top: 1rem;
-}
-
-.forecast-content.active {
-  display: block;
-}
-
-.daily-forecast {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.forecast-card {
-  background-color: #f7f7f7;
-  padding: 1rem;
-  border-radius: 8px;
-  text-align: center;
-  box-shadow: var(--shadow);
-  transition: transform 0.3s;
-}
-
-.forecast-card:hover {
-  transform: translateY(-5px);
-}
-
-.hourly-items {
-  display: flex;
-  overflow-x: auto;
-  padding-bottom: 1rem;
-  gap: 1rem;
-}
-
-.hourly-item {
-  min-width: 100px;
-  text-align: center;
-  background-color: #f2f2f2;
-  border-radius: 6px;
-  padding: 0.8rem;
-  box-shadow: var(--shadow);
-}
-
-.hourly-icon, .forecast-icon {
-  width: 40px;
-  height: 40px;
-  margin: 0.5rem auto;
-}
-
-.chart-container {
-  height: 350px;
-  margin-top: 2rem;
-}
-
-footer {
-  text-align: center;
-  padding: 1rem;
-  font-size: 0.9rem;
-  color: var(--gray);
-}
-
-@media (max-width: 600px) {
-  .weather-main {
-    flex-direction: column;
-    text-align: center;
+  try {
+    const data = await fetchForecast(city);
+    updateCurrentWeather(data);
+    updateHourlyForecast(data.forecastTimestamps);
+    updateDailyForecast(data.forecastTimestamps);
+    updateChart(data.forecastTimestamps);
+  } catch (err) {
+    console.error(err);
+    alert('Nepavyko gauti orų duomenų.');
+  } finally {
+    document.getElementById('loading-indicator').style.display = 'none';
   }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  populateCityDropdown();
+  toggleTabs();
+  document.getElementById('place-select').value = 'vilnius';
+  getWeather();
+});
+
+document.getElementById('get-weather-btn').addEventListener('click', getWeather);
